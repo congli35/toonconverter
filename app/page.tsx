@@ -164,12 +164,12 @@ export default function Home() {
               <SelectValue placeholder="Select converter" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="json-to-toon">JSON → TOON</SelectItem>
+              <SelectItem value="json-to-toon">JSON to TOON</SelectItem>
               <SelectItem value="toon-to-json" disabled>
-                TOON → JSON (coming soon)
+                TOON to JSON (coming soon)
               </SelectItem>
               <SelectItem value="xml-to-json" disabled>
-                XML → JSON (coming soon)
+                XML to JSON (coming soon)
               </SelectItem>
             </SelectContent>
           </Select>
