@@ -21,6 +21,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { safeParseJson } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type ConvertResult = {
   output: string;
@@ -30,13 +31,18 @@ type ConvertResult = {
 export default function Home() {
   // UI state
   const firstConverter = listConverters()[0];
+  const delimiterChoices = {
+    comma: "," as JsonToToonOptions["delimiter"],
+    tab: "\t" as JsonToToonOptions["delimiter"],
+    pipe: "|" as JsonToToonOptions["delimiter"],
+  };
   const [converterId, setConverterId] = useState<ConverterId>(
     (firstConverter?.id as ConverterId) ?? "json-to-toon"
   );
   const converter = useMemo(() => getConverter(converterId), [converterId]);
   const [input, setInput] = useState<string>(
     (converter?.defaultInput as string) ??
-      '{"users":[{"id":1,"name":"Alice","role":"admin","active":true},{"id":2,"name":"Bob","role":"user","active":true},{"id":3,"name":"Charlie","role":"user","active":false}]}'
+      '{"orders":[{"orderId":"ORD-1001","customer":{"name":"Alice","tier":"Gold"},"items":[{"sku":"A1","qty":2,"price":19.99},{"sku":"B4","qty":1,"price":49.5}],"total":89.48},{"orderId":"ORD-1002","customer":{"name":"Bob","tier":"Silver"},"items":[{"sku":"A1","qty":1,"price":19.99},{"sku":"C7","qty":3,"price":12.5}],"total":57.49}]}'
   );
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
@@ -56,6 +62,8 @@ export default function Home() {
       (async () => {
         try {
           if (!converter) return;
+          console.log(options);
+          console.log(options.delimiter.length, options.delimiter.charCodeAt(0))
           const result = await converter.convert(input, options);
           setOutput(result.output);
           setError(undefined);
@@ -74,6 +82,8 @@ export default function Home() {
   const outputTokens = useMemo(() => GPTTokenizer.estimate(output), [output]);
   const savings = inputTokens > 0 ? inputTokens - outputTokens : 0;
   const percent = inputTokens > 0 ? Math.round((savings / inputTokens) * 100) : 0;
+  const percentLabel =
+    inputTokens === 0 ? "0%" : `${percent > 0 ? `-${percent}` : `+${Math.abs(percent)}`}%`;
 
   const copyOutput = async () => {
     try {
@@ -192,16 +202,24 @@ export default function Home() {
 
           <Label htmlFor="delimiter-select" className="text-sm">Delimiter</Label>
           <Select
-            value={options.delimiter}
-            onValueChange={(v) => setOptions((o) => ({ ...o, delimiter: v as JsonToToonOptions["delimiter"] }))}
+            value={
+              (Object.entries(delimiterChoices).find(([, char]) => char === options.delimiter)?.[0] ??
+                "comma") as keyof typeof delimiterChoices
+            }
+            onValueChange={(v) =>
+              setOptions((o) => ({
+                ...o,
+                delimiter: delimiterChoices[v as keyof typeof delimiterChoices],
+              }))
+            }
           >
             <SelectTrigger id="delimiter-select" className="w-[140px]" aria-label="Select delimiter type">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value=",">Comma</SelectItem>
-              <SelectItem value="\t">Tab</SelectItem>
-              <SelectItem value="|">Pipe</SelectItem>
+              <SelectItem value="comma">Comma</SelectItem>
+              <SelectItem value="tab">Tab</SelectItem>
+              <SelectItem value="pipe">Pipe</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -286,7 +304,11 @@ export default function Home() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Token impact</p>
               <h3 className="mt-1 text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                {savings > 0 ? `-${percent}% tokens` : "No savings yet"}
+                {inputTokens === 0
+                  ? "No savings yet"
+                  : savings > 0
+                    ? `-${percent}% tokens`
+                    : `+${Math.abs(percent)}% tokens`}
               </h3>
               <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
                 Powered by{" "}
@@ -305,12 +327,18 @@ export default function Home() {
                 <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">TOON tokens</p>
                 <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-50">{outputTokens}</p>
               </div>
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 shadow-sm transition-shadow hover:shadow dark:border-emerald-800 dark:bg-emerald-950/70">
-                <p className="text-xs font-semibold uppercase tracking-wider">Saved</p>
+              <div className={`rounded-xl p-4 text-emerald-900 shadow-sm transition-shadow hover:shadow dark:bg-emerald-950/70 ${
+                savings >= 0
+                  ? "border border-emerald-200 bg-emerald-50 dark:border-emerald-800"
+                  : "border border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/70"
+              }`}>
+                <p className="text-xs font-semibold uppercase tracking-wider">
+                  {savings >= 0 ? "Saved" : "Overhead"}
+                </p>
                 <p className="mt-1 text-2xl font-bold">
-                  {savings >= 0 ? savings : 0}{" "}
-                  <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                    ({percent >= 0 ? `-${percent}%` : "0%"})
+                  {savings}{" "}
+                  <span className={cn("text-sm font-semibold", savings >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300")}>
+                    ({percentLabel})
                   </span>
                 </p>
               </div>
