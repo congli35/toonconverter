@@ -2,7 +2,8 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { HeuristicTokenizer } from "@/lib/tokenizer";
+import Image from "next/image";
+import { GPTTokenizer } from "@/lib/tokenizer";
 import { listConverters, getConverter } from "@/lib/converters/registry";
 import type { ConverterId } from "@/lib/converters/types";
 import type { JsonToToonOptions } from "@/lib/converters/json-to-toon";
@@ -68,8 +69,8 @@ export default function Home() {
     };
   }, [input, options, converter]);
 
-  const inputTokens = useMemo(() => HeuristicTokenizer.estimate(input), [input]);
-  const outputTokens = useMemo(() => HeuristicTokenizer.estimate(output), [output]);
+  const inputTokens = useMemo(() => GPTTokenizer.estimate(input), [input]);
+  const outputTokens = useMemo(() => GPTTokenizer.estimate(output), [output]);
   const savings = inputTokens > 0 ? inputTokens - outputTokens : 0;
   const percent = inputTokens > 0 ? Math.round((savings / inputTokens) * 100) : 0;
 
@@ -107,18 +108,27 @@ export default function Home() {
       <header className="sticky top-0 z-10 w-full border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-black/50">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-zinc-900 dark:bg-zinc-100" />
+            <Image src="/icon.svg" alt="TOON converter logo" width={24} height={24} priority />
             <span className="text-sm font-semibold tracking-wide">TOON Converter</span>
           </div>
-          <nav className="text-xs">
+          <nav className="flex items-center gap-4 text-xs">
             <Link href="/" className="hover:underline">
-              JSON → TOON
+              JSON to TOON
+            </Link>
+            <Link href="#faq" className="hover:underline">
+              FAQ
             </Link>
           </nav>
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-6xl grow px-4 py-6">
+        <h1 className="mb-3 text-3xl font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
+          Toon Converter: Everything to TOON, instantly in your browser
+        </h1>
+        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200">
+          All conversions run entirely in your browser—data never leaves this page.
+        </div>
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <span className="text-sm font-medium">Converter</span>
           <Select
@@ -247,30 +257,114 @@ export default function Home() {
         </div>
 
         {/* Token stats */}
-        <div className="mt-4 rounded-lg border border-zinc-200 bg-white p-3 text-sm shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="mt-4 rounded-xl border border-zinc-200 bg-gradient-to-br from-white via-white to-zinc-50 p-4 text-sm shadow-sm dark:border-zinc-800 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <span className="text-zinc-500">JSON tokens (est.): </span>
-              <span className="font-medium">{inputTokens}</span>
+              <p className="text-xs uppercase tracking-wide text-zinc-500">Token impact</p>
+              <h3 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+                {savings > 0 ? `-${percent}% tokens` : "No savings yet"}
+              </h3>
+              <p className="text-xs text-zinc-500">
+                Powered by{" "}
+                <a href="https://github.com/niieani/gpt-tokenizer" target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
+                  gpt-tokenizer
+                </a>{" "}
+                (o200k_base · GPT-5 tokenizer)
+              </p>
             </div>
-            <div>
-              <span className="text-zinc-500">TOON tokens (est.): </span>
-              <span className="font-medium">{outputTokens}</span>
-            </div>
-            <div>
-              <span className="text-zinc-500">Saved: </span>
-              <span className="font-medium">
-                {savings >= 0 ? savings : 0} ({percent >= 0 ? `-${percent}%` : "0%"})
-              </span>
-            </div>
-            <div className="text-xs text-zinc-500">
-              Token counts are estimated (chars/4). Exact stats will be added when available in TOON.
+            <div className="grid w-full gap-3 text-sm sm:grid-cols-3">
+              <div className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
+                <p className="text-xs text-zinc-500">JSON tokens</p>
+                <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{inputTokens}</p>
+              </div>
+              <div className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
+                <p className="text-xs text-zinc-500">TOON tokens</p>
+                <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{outputTokens}</p>
+              </div>
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950">
+                <p className="text-xs uppercase tracking-wide">Saved</p>
+                <p className="text-lg font-bold">
+                  {savings >= 0 ? savings : 0}{" "}
+                  <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                    ({percent >= 0 ? `-${percent}%` : "0%"})
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* SEO-friendly FAQ */}
+        <section id="faq" className="mt-8 space-y-4 rounded-2xl border border-zinc-200 bg-white/80 p-6 text-sm shadow-sm dark:border-zinc-800 dark:bg-zinc-950/60">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-300">
+              TOON Converter FAQ
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+              Everything you need to know about the TOON format
+            </h2>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              This toon converter keeps every transformation in the browser. Paste any JSON on the left editor
+              and see a compressed, LLM-ready TOON representation instantly—no uploads, no waiting.
+            </p>
+          </div>
+          <dl className="space-y-4">
+            <div className="rounded-xl border border-zinc-200 bg-gradient-to-r from-zinc-50 to-white p-4 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
+              <dt className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                What exactly is the TOON format?
+              </dt>
+              <dd className="mt-1 text-zinc-600 dark:text-zinc-300">
+                TOON (Token-Oriented Object Notation) is a compact, lossless representation of JSON that lists array lengths,
+                flattens columns for uniform objects, and trims whitespace to reduce token counts for LLM prompts.
+                Think of it as CSV&apos;s efficiency with JSON&apos;s structure, perfect for feeding structured data to GPT-5 and beyond—and this toon converter turns that theory into a copy-paste workflow.
+              </dd>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-gradient-to-r from-zinc-50 to-white p-4 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
+              <dt className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                Why convert JSON to TOON with this tool?
+              </dt>
+              <dd className="mt-1 text-zinc-600 dark:text-zinc-300">
+                The dual Monaco editors, live tokenizer, and delimiter controls make this toon converter ideal for exploring
+                how much prompt budget you can save. You can verify schema fidelity instantly while our token stats quantify
+                the improvements, so teams can confidently ship smaller, cheaper LLM payloads with this TOON converter as their QA step.
+              </dd>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-gradient-to-r from-zinc-50 to-white p-4 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
+              <dt className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                Is TOON only for tables?
+              </dt>
+              <dd className="mt-1 text-zinc-600 dark:text-zinc-300">
+                No—nested objects, arrays, dotted key folding, and alternative delimiters are all part of the spec.
+                Uniform collections (like user lists or transactions) see the biggest savings, but TOON still mirrors
+                your entire JSON structure so decoding back to JSON is straightforward. That makes this toon converter
+                a practical bridge between human-readable specs and production prompt payloads.
+              </dd>
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-gradient-to-r from-zinc-50 to-white p-4 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
+              <dt className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                Where can I learn more about the TOON standard?
+              </dt>
+              <dd className="mt-1 text-zinc-600 dark:text-zinc-300">
+                The official spec and reference implementation live at{" "}
+                <a href="https://github.com/toon-format/toon" target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300">
+                  github.com/toon-format/toon
+                </a>
+                . Pair that with this toon converter to read, transform, and validate TOON alongside the source documentation.
+              </dd>
+            </div>
+          </dl>
+        </section>
       </main>
-      <footer className="border-t border-zinc-200 py-4 text-center text-xs text-zinc-500 dark:border-zinc-800">
-        Built for in-browser conversion. UI uses Tailwind; Radix/Shadcn components can be added on request.
+      <footer className="border-t border-zinc-200 dark:border-zinc-800">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 text-xs text-zinc-500 dark:text-zinc-400 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <Image src="/icon.svg" alt="TOON converter logo" width={20} height={20} />
+            <div>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">TOON Converter</p>
+              <p className="text-[11px] uppercase tracking-wide">All in-browser · Privacy-first</p>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
