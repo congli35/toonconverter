@@ -62,8 +62,6 @@ export default function Home() {
       (async () => {
         try {
           if (!converter) return;
-          console.log(options);
-          console.log(options.delimiter.length, options.delimiter.charCodeAt(0))
           const result = await converter.convert(input, options);
           setOutput(result.output);
           setError(undefined);

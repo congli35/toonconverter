@@ -1,6 +1,5 @@
 import { encode, type EncodeOptions, type Delimiter } from "@toon-format/toon";
 import { Converter } from "./types";
-import { safeParseJson } from "@/lib/utils/json";
 
 export type JsonToToonOptions = Required<Pick<EncodeOptions, "indent" | "delimiter" | "keyFolding">>;
 
@@ -39,14 +38,15 @@ export const JsonToToonConverter: Converter<JsonToToonOptions> = {
     },
   ],
   async convert(input, options) {
-    const parsed = safeParseJson(input);
-    if (!parsed.ok) {
-      throw new Error(parsed.message);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(input);
+    } catch (error: any) {
+      throw new Error(error?.message ?? "Invalid JSON input");
     }
-    return { output: encode(parsed.value, options) };
+    return { output: encode(parsed, options) };
   },
   validateInput(input) {
-    const parsed = safeParseJson(input);
-    return parsed.ok ? { ok: true } : { ok: false, message: parsed.message };
+    return { ok: true };
   },
 };
