@@ -124,7 +124,7 @@ export default function Home() {
 
       <main className="mx-auto w-full max-w-6xl grow px-4 py-6">
         <h1 className="mb-3 text-3xl font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
-          Toon Converter: Everything to TOON, instantly in your browser
+          TOON Converter - Everything to TOON
         </h1>
         <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200">
           All conversions run entirely in your browser—data never leaves this page.
@@ -261,7 +261,7 @@ export default function Home() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs uppercase tracking-wide text-zinc-500">Token impact</p>
-              <h3 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+              <h3 className="text-2xl font-semibold text-emerald-600 dark:text-emerald-300">
                 {savings > 0 ? `-${percent}% tokens` : "No savings yet"}
               </h3>
               <p className="text-xs text-zinc-500">
