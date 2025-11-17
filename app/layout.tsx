@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "TOON Converter - JSON to TOON Format Converter",
   description: "Convert JSON to TOON format instantly in your browser. Reduce token count for LLM prompts while maintaining data structure. Fast, private, and completely client-side.",
   keywords: ["TOON", "JSON", "converter", "LLM", "tokens", "GPT", "data compression"],
+  icons: {
+    icon: ["/icon.svg"],
+    shortcut: ["/icon.svg"],
+    apple: ["/icon.svg"],
+  },
 };
 
 export default function RootLayout({
