@@ -1,12 +1,8 @@
 // "use client" marks this as a client component for interactive conversion
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { GPTTokenizer } from "@/lib/tokenizer";
-import { listConverters, getConverter } from "@/lib/converters/registry";
-import type { ConverterId } from "@/lib/converters/types";
+import { getConverter } from "@/lib/converters/registry";
 import type { JsonToToonOptions } from "@/lib/converters/json-to-toon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,24 +18,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Label } from "@/components/ui/label";
 import { safeParseJson } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-
-type ConvertResult = {
-  output: string;
-  error?: string;
-};
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { TokenStats } from "@/components/token-stats";
+import { useTokenMetrics } from "@/lib/hooks/use-token-metrics";
 
 export default function Home() {
   // UI state
-  const firstConverter = listConverters()[0];
+  const converter = getConverter("json-to-toon");
   const delimiterChoices = {
     comma: "," as JsonToToonOptions["delimiter"],
     tab: "\t" as JsonToToonOptions["delimiter"],
     pipe: "|" as JsonToToonOptions["delimiter"],
   };
-  const [converterId, setConverterId] = useState<ConverterId>(
-    (firstConverter?.id as ConverterId) ?? "json-to-toon"
-  );
-  const converter = useMemo(() => getConverter(converterId), [converterId]);
   const [input, setInput] = useState<string>(
     (converter?.defaultInput as string) ??
       '{"orders":[{"orderId":"ORD-1001","customer":{"name":"Alice","tier":"Gold"},"items":[{"sku":"A1","qty":2,"price":19.99},{"sku":"B4","qty":1,"price":49.5}],"total":89.48},{"orderId":"ORD-1002","customer":{"name":"Bob","tier":"Silver"},"items":[{"sku":"A1","qty":1,"price":19.99},{"sku":"C7","qty":3,"price":12.5}],"total":57.49}]}'
@@ -76,12 +67,7 @@ export default function Home() {
     };
   }, [input, options, converter]);
 
-  const inputTokens = useMemo(() => GPTTokenizer.estimate(input), [input]);
-  const outputTokens = useMemo(() => GPTTokenizer.estimate(output), [output]);
-  const savings = inputTokens > 0 ? inputTokens - outputTokens : 0;
-  const percent = inputTokens > 0 ? Math.round((savings / inputTokens) * 100) : 0;
-  const percentLabel =
-    inputTokens === 0 ? "0%" : `${percent > 0 ? `-${percent}` : `+${Math.abs(percent)}`}%`;
+  const { inputTokens, outputTokens, savings, percent, percentLabel } = useTokenMetrics(input, output);
 
   const copyOutput = async () => {
     try {
@@ -134,22 +120,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-zinc-50 font-sans text-zinc-900 dark:bg-black dark:text-zinc-50">
-      <header className="sticky top-0 z-10 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-xl dark:border-zinc-800 dark:bg-black/50">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <Image src="/icon.svg" alt="TOON converter logo" width={28} height={28} priority />
-            <span className="text-base font-semibold tracking-tight">TOON Converter</span>
-          </div>
-          <nav className="flex items-center gap-6 text-sm" aria-label="Main navigation">
-            <Link href="/" className="font-medium transition-colors hover:text-zinc-600 dark:hover:text-zinc-300">
-              JSON to TOON
-            </Link>
-            <Link href="#faq" className="font-medium transition-colors hover:text-zinc-600 dark:hover:text-zinc-300">
-              FAQ
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="mx-auto w-full max-w-6xl grow px-4 py-8">
         <h1 className="mb-3 text-4xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50 text-center">
@@ -162,70 +133,49 @@ export default function Home() {
         <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200" role="note" aria-label="Privacy notice">
           All conversions run entirely in your browser—data never leaves this page.
         </div>
-        <div className="mb-6 flex flex-wrap items-center gap-4" role="group" aria-label="Converter settings">
-          <span className="text-sm font-semibold">Converter</span>
-          <Select
-            value={converterId}
-            onValueChange={(id: ConverterId) => {
-              setConverterId(id);
-              const next = getConverter(id);
-              if (next?.defaultInput) setInput(String(next.defaultInput));
-            }}
-          >
-            <SelectTrigger className="w-[200px]" aria-label="Select converter type">
-              <SelectValue placeholder="Select converter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="json-to-toon">JSON to TOON</SelectItem>
-              <SelectItem value="toon-to-json" disabled>
-                TOON to JSON (coming soon)
-              </SelectItem>
-              <SelectItem value="xml-to-json" disabled>
-                XML to JSON (coming soon)
-              </SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4" role="group" aria-label="Converter settings">
+          <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">JSON to TOON Converter</h2>
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="text-sm font-semibold">Settings</span>
+            <Label htmlFor="indent-select" className="text-sm">Indent</Label>
+            <Select
+              value={String(options.indent)}
+              onValueChange={(v) => setOptions((o) => ({ ...o, indent: Number(v) }))}
+            >
+              <SelectTrigger id="indent-select" className="w-[80px]" aria-label="Select indent size">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <span className="ml-4 text-sm font-semibold">Settings</span>
-          <Label htmlFor="indent-select" className="text-sm">Indent</Label>
-          <Select
-            value={String(options.indent)}
-            onValueChange={(v) => setOptions((o) => ({ ...o, indent: Number(v) }))}
-          >
-            <SelectTrigger id="indent-select" className="w-[80px]" aria-label="Select indent size">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2">2</SelectItem>
-              <SelectItem value="3">3</SelectItem>
-              <SelectItem value="4">4</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Label htmlFor="delimiter-select" className="text-sm">Delimiter</Label>
-          <Select
-            value={
-              (Object.entries(delimiterChoices).find(([, char]) => char === options.delimiter)?.[0] ??
-                "comma") as keyof typeof delimiterChoices
-            }
-            onValueChange={(v) =>
-              setOptions((o) => ({
-                ...o,
-                delimiter: delimiterChoices[v as keyof typeof delimiterChoices],
-              }))
-            }
-          >
-            <SelectTrigger id="delimiter-select" className="w-[140px]" aria-label="Select delimiter type">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="comma">Comma</SelectItem>
-              <SelectItem value="tab">Tab</SelectItem>
-              <SelectItem value="pipe">Pipe</SelectItem>
-            </SelectContent>
-          </Select>
+            <Label htmlFor="delimiter-select" className="text-sm">Delimiter</Label>
+            <Select
+              value={
+                (Object.entries(delimiterChoices).find(([, char]) => char === options.delimiter)?.[0] ??
+                  "comma") as keyof typeof delimiterChoices
+              }
+              onValueChange={(v) =>
+                setOptions((o) => ({
+                  ...o,
+                  delimiter: delimiterChoices[v as keyof typeof delimiterChoices],
+                }))
+              }
+            >
+              <SelectTrigger id="delimiter-select" className="w-[140px]" aria-label="Select delimiter type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="comma">Comma</SelectItem>
+                <SelectItem value="tab">Tab</SelectItem>
+                <SelectItem value="pipe">Pipe</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Left: JSON input */}
           <Card>
@@ -300,53 +250,19 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Token stats */}
-        <section className="mt-6 rounded-2xl border border-zinc-200 bg-gradient-to-br from-white via-white to-zinc-50/50 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950/50" aria-label="Token statistics">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Token impact</p>
-              <h3 className="mt-1 text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                {inputTokens === 0
-                  ? "No savings yet"
-                  : savings > 0
-                    ? `-${percent}% tokens`
-                    : `+${Math.abs(percent)}% tokens`}
-              </h3>
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                Powered by{" "}
-                <a href="https://github.com/niieani/gpt-tokenizer" target="_blank" rel="noreferrer" className="font-medium underline-offset-2 transition-colors hover:text-zinc-900 hover:underline dark:hover:text-zinc-200">
-                  gpt-tokenizer
-                </a>{" "}
-                (o200k_base · GPT-5 tokenizer)
-              </p>
-            </div>
-            <div className="grid w-full gap-4 md:w-auto md:grid-cols-3">
-              <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-shadow hover:shadow dark:border-zinc-800 dark:bg-zinc-950">
-                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">JSON tokens</p>
-                <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-50">{inputTokens}</p>
-              </div>
-              <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-shadow hover:shadow dark:border-zinc-800 dark:bg-zinc-950">
-                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">TOON tokens</p>
-                <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-50">{outputTokens}</p>
-              </div>
-              <div className={`rounded-xl p-4 text-emerald-900 shadow-sm transition-shadow hover:shadow dark:bg-emerald-950/70 ${
-                savings >= 0
-                  ? "border border-emerald-200 bg-emerald-50 dark:border-emerald-800"
-                  : "border border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/70"
-              }`}>
-                <p className="text-xs font-semibold uppercase tracking-wider">
-                  {savings >= 0 ? "Saved" : "Overhead"}
-                </p>
-                <p className="mt-1 text-2xl font-bold">
-                  {savings}{" "}
-                  <span className={cn("text-sm font-semibold", savings >= 0 ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300")}>
-                    ({percentLabel})
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <TokenStats
+          summaryData={{ inputTokens, savings, percent, percentLabel }}
+          metrics={[
+            {
+              label: "JSON tokens",
+              value: inputTokens,
+            },
+            {
+              label: "TOON tokens",
+              value: outputTokens,
+            },
+          ]}
+        />
 
         {/* SEO-friendly FAQ */}
         <section id="faq" className="mt-8 space-y-6 rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/60">
@@ -422,45 +338,7 @@ export default function Home() {
           </dl>
         </section>
       </main>
-      <footer className="border-t border-zinc-200 bg-white/50 dark:border-zinc-800 dark:bg-zinc-950/30">
-        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 text-sm text-zinc-600 dark:text-zinc-400 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Image src="/icon.svg" alt="TOON converter logo" width={24} height={24} />
-            <div>
-              <p className="text-base font-bold text-zinc-900 dark:text-zinc-50">TOON Converter</p>
-              <p className="text-xs font-medium uppercase tracking-wider">All in-browser · Privacy-first</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-10">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                Quick links
-              </p>
-              <div className="mt-2 flex flex-col gap-2 text-sm">
-                <Link href="/" className="hover:underline">
-                  JSON to TOON
-                </Link>
-                <Link href="#faq" className="hover:underline">
-                  FAQ
-                </Link>
-              </div>
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                Resources
-              </p>
-              <div className="mt-2 flex flex-col gap-2 text-sm">
-                <a href="https://github.com/toon-format/toon" target="_blank" rel="noreferrer" className="hover:underline">
-                  TOON Spec
-                </a>
-                <a href="https://github.com/niieani/gpt-tokenizer" target="_blank" rel="noreferrer" className="hover:underline">
-                  GPT Tokenizer
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
 
       {/* FAQ structured data for richer snippets */}
       <script
