@@ -152,9 +152,13 @@ export default function Home() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl grow px-4 py-8">
-        <h1 className="mb-4 text-4xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50">
-          TOON Converter - Everything to TOON
+        <h1 className="mb-3 text-4xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50 text-center">
+          - TOON Converter Save Tokens with TOON
         </h1>
+        <p className="mb-4 max-w-3xl text-lg text-zinc-700 dark:text-zinc-300 text-center mx-auto">
+          A privacy-first toon converter that shrinks structured data into TOON format in your browser—no uploads, just
+          lighter payloads and fewer tokens for cheaper, faster LLM prompts.
+        </p>
         <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200" role="note" aria-label="Privacy notice">
           All conversions run entirely in your browser—data never leaves this page.
         </div>
@@ -351,7 +355,7 @@ export default function Home() {
               TOON Converter FAQ
             </p>
             <h2 className="mt-3 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-              Everything you need to know about the TOON format
+              Everything you need to know about saving tokens with TOON
             </h2>
             <p className="mt-3 text-base text-zinc-600 dark:text-zinc-400">
               This toon converter keeps every transformation in the browser. Paste any JSON on the left editor
@@ -457,6 +461,64 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* FAQ structured data for richer snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'What exactly is the TOON format?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text:
+                    'TOON (Token-Oriented Object Notation) is a compact, lossless representation of JSON that lists array lengths, flattens columns for uniform objects, and trims whitespace to reduce token counts for LLM prompts.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Why convert JSON to TOON with this tool?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text:
+                    'The dual editors, live tokenizer, and delimiter controls make this toon converter ideal for exploring token savings while keeping schema fidelity for production LLM prompts.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is TOON only for tables?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text:
+                    'No—nested objects, arrays, dotted key folding, and alternative delimiters are all part of the spec, making the toon converter useful beyond tabular data.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Where can I learn more about the TOON standard?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text:
+                    'Visit github.com/toon-format/toon for the official spec and reference implementation to pair with this toon converter.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What powers the token savings math?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text:
+                    'We use the gpt-tokenizer (o200k_base) entirely in the browser so the token savings shown by the toon converter match production LLM tokenization.',
+                },
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }
