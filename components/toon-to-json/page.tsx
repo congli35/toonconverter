@@ -119,24 +119,6 @@ export default function ToonToJsonClientPage() {
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">TOON to JSON Converter</h1>
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm font-semibold">Settings</span>
-            <Label htmlFor="indent-select" className="text-sm">
-              Indent
-            </Label>
-            <Select
-              value={String(options.indent)}
-              onValueChange={(value) =>
-                setOptions((prev) => ({ ...prev, indent: Number(value) as ToonToJsonOptions["indent"] }))
-              }
-            >
-              <SelectTrigger id="indent-select" className="w-[80px]" aria-label="Select indent size">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-              </SelectContent>
-            </Select>
             <Label htmlFor="strict-select" className="text-sm">
               Strict
             </Label>
