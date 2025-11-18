@@ -153,7 +153,7 @@ export default function Home() {
 
       <main className="mx-auto w-full max-w-6xl grow px-4 py-8">
         <h1 className="mb-3 text-4xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50 text-center">
-          - TOON Converter Save Tokens with TOON
+          TOON Converter - Save Tokens with TOON
         </h1>
         <p className="mb-4 max-w-3xl text-lg text-zinc-700 dark:text-zinc-300 text-center mx-auto">
           A privacy-first toon converter that shrinks structured data into TOON format in your browser—no uploads, just
