@@ -1,4 +1,4 @@
-export type ConverterId = "json-to-toon" | "toon-to-json" | "xml-to-json";
+export type ConverterId = "json-to-toon" | "toon-to-json" | "xml-to-toon";
 
 export type SettingType = "select" | "number" | "boolean";
 

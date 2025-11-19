@@ -18,6 +18,9 @@ export function SiteHeader() {
           <Link href="/toon-to-json" className="font-medium transition-colors hover:text-zinc-600 dark:hover:text-zinc-300">
             TOON to JSON
           </Link>
+          <Link href="/xml-to-toon" className="font-medium transition-colors hover:text-zinc-600 dark:hover:text-zinc-300">
+            XML to TOON
+          </Link>
           <Link href="/#faq" className="font-medium transition-colors hover:text-zinc-600 dark:hover:text-zinc-300">
             FAQ
           </Link>

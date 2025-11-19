@@ -26,6 +26,9 @@ export function SiteFooter() {
               <Link href="/toon-to-json" className="hover:underline">
                 TOON to JSON
               </Link>
+              <Link href="/xml-to-toon" className="hover:underline">
+                XML to TOON
+              </Link>
               <Link href="/#faq" className="hover:underline">
                 FAQ
               </Link>

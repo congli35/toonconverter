@@ -22,6 +22,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TokenStats } from "@/components/token-stats";
 import { useTokenMetrics } from "@/lib/hooks/use-token-metrics";
+import { ToonOutputCard } from "@/components/toon-output-card";
 
 export default function Home() {
   // UI state
@@ -33,7 +34,7 @@ export default function Home() {
   };
   const [input, setInput] = useState<string>(
     (converter?.defaultInput as string) ??
-      '{"orders":[{"orderId":"ORD-1001","customer":{"name":"Alice","tier":"Gold"},"items":[{"sku":"A1","qty":2,"price":19.99},{"sku":"B4","qty":1,"price":49.5}],"total":89.48},{"orderId":"ORD-1002","customer":{"name":"Bob","tier":"Silver"},"items":[{"sku":"A1","qty":1,"price":19.99},{"sku":"C7","qty":3,"price":12.5}],"total":57.49}]}'
+    '{"orders":[{"orderId":"ORD-1001","customer":{"name":"Alice","tier":"Gold"},"items":[{"sku":"A1","qty":2,"price":19.99},{"sku":"B4","qty":1,"price":49.5}],"total":89.48},{"orderId":"ORD-1002","customer":{"name":"Bob","tier":"Silver"},"items":[{"sku":"A1","qty":1,"price":19.99},{"sku":"C7","qty":3,"price":12.5}],"total":57.49}]}'
   );
   const [output, setOutput] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
@@ -69,37 +70,7 @@ export default function Home() {
 
   const { inputTokens, outputTokens, savings, percent, percentLabel } = useTokenMetrics(input, output);
 
-  const copyOutput = async () => {
-    try {
-      await navigator.clipboard.writeText(output);
-      toast.success("Copied to clipboard!", {
-        description: "TOON output has been copied successfully.",
-      });
-    } catch {
-      toast.error("Failed to copy", {
-        description: "Could not copy to clipboard. Please try again.",
-      });
-    }
-  };
 
-  const downloadOutput = () => {
-    try {
-      const blob = new Blob([output], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "output.toon";
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("Download started!", {
-        description: "Your TOON file is being downloaded.",
-      });
-    } catch {
-      toast.error("Download failed", {
-        description: "Could not download the file. Please try again.",
-      });
-    }
-  };
 
   const prettifyInput = () => {
     const parsed = safeParseJson(input);
@@ -198,41 +169,7 @@ export default function Home() {
           </Card>
 
           {/* Right: TOON output */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span>TOON Output</span>
-                  <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">Read-only</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button onClick={copyOutput} variant="secondary" size="sm" aria-label="Copy TOON output to clipboard">
-                          Copy
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy output to clipboard</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button onClick={downloadOutput} variant="secondary" size="sm" aria-label="Download TOON output as file">
-                          Download
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Download as .toon</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea className="min-h-[320px]" value={output} readOnly height={320} />
-            </CardContent>
-          </Card>
+          <ToonOutputCard output={output} />
         </div>
 
         <TokenStats
