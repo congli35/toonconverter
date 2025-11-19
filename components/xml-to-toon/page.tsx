@@ -43,8 +43,6 @@ export default function XmlToToonClientPage() {
         keyFolding: "off",
     });
 
-
-
     const timerRef = useRef<number | null>(null);
     useEffect(() => {
         if (timerRef.current) {

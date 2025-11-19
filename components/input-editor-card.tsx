@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ReactNode } from "react";
-import { OnMount } from "@monaco-editor/react";
 
 interface InputEditorCardProps {
     title: string;
@@ -13,7 +12,6 @@ interface InputEditorCardProps {
     error?: string;
     action?: ReactNode;
     className?: string;
-    onMount?: OnMount;
 }
 
 export function InputEditorCard({
@@ -24,7 +22,6 @@ export function InputEditorCard({
     error,
     action,
     className,
-    onMount,
 }: InputEditorCardProps) {
     return (
         <Card className={className}>
@@ -46,7 +43,6 @@ export function InputEditorCard({
                     onChange={onChange}
                     language={language}
                     height={320}
-                    onMount={onMount}
                 />
                 {error ? (
                     <div
