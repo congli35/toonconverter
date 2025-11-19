@@ -21,6 +21,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { TokenStats } from "@/components/token-stats";
 import { cn } from "@/lib/utils";
 import { useTokenMetrics } from "@/lib/hooks/use-token-metrics";
+import { InputEditorCard } from "@/components/input-editor-card";
 
 export default function ToonToJsonClientPage() {
   const converter = getConverter("toon-to-json");
@@ -157,40 +158,30 @@ export default function ToonToJsonClientPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span>TOON Input</span>
-                  <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">Editable</span>
-                </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="secondary" size="sm" onClick={pasteSample} aria-label="Load sample TOON">
-                        Sample
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Replace input with sample TOON snippet</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                className={error ? "ring-2 ring-red-500" : ""}
-                value={input}
-                onChange={setInput}
-                language="plaintext"
-                height={320}
-              />
-              {error ? (
-                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-400">
-                  {error}
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
+          <InputEditorCard
+            title="TOON Input"
+            value={input}
+            onChange={setInput}
+            error={error}
+            language="plaintext"
+            action={
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={pasteSample}
+                      aria-label="Load sample TOON"
+                    >
+                      Sample
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Replace input with sample TOON snippet</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            }
+          />
 
           <Card>
             <CardHeader>

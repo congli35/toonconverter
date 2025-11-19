@@ -6,7 +6,7 @@ import { getConverter } from "@/lib/converters/registry";
 import type { JsonToToonOptions } from "@/lib/converters/json-to-toon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select,
   SelectContent,
@@ -23,6 +23,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { TokenStats } from "@/components/token-stats";
 import { useTokenMetrics } from "@/lib/hooks/use-token-metrics";
 import { ToonOutputCard } from "@/components/toon-output-card";
+import { InputEditorCard } from "@/components/input-editor-card";
 
 export default function Home() {
   // UI state
@@ -134,39 +135,31 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Left: JSON input */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span>JSON Input</span>
-                  <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">Editable</span>
-                </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button onClick={prettifyInput} variant="secondary" size="sm" aria-label="Prettify JSON input">
-                        Prettify JSON
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Format the left JSON input</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                className={error ? "ring-2 ring-red-500" : ""}
-                value={input}
-                onChange={setInput}
-                height={320}
-              />
-              {error ? (
-                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-400" role="alert" aria-live="polite">
-                  {error}
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
+          {/* Left: JSON input */}
+          <InputEditorCard
+            title="JSON Input"
+            value={input}
+            onChange={setInput}
+            error={error}
+            language="json"
+            action={
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={prettifyInput}
+                      variant="secondary"
+                      size="sm"
+                      aria-label="Prettify JSON input"
+                    >
+                      Prettify JSON
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Format the left JSON input</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            }
+          />
 
           {/* Right: TOON output */}
           <ToonOutputCard output={output} />

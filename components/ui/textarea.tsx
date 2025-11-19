@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import dynamic from "next/dynamic";
-import { loader } from "@monaco-editor/react";
+import { loader, OnMount } from "@monaco-editor/react";
 import { cn } from "@/lib/utils";
 
 // Point monaco to the locally served assets to avoid CDN fetches.
@@ -17,10 +17,11 @@ export interface TextareaProps {
   language?: string;
   height?: string | number;
   className?: string;
+  onMount?: OnMount;
 }
 
 const Textarea = React.forwardRef<HTMLDivElement, TextareaProps>(
-  ({ value, onChange, readOnly, language = "json", height = 320, className }, _ref) => {
+  ({ value, onChange, readOnly, language = "json", height = 320, className, onMount }, _ref) => {
     const [theme, setTheme] = React.useState<"vs" | "vs-dark">("vs");
 
     React.useEffect(() => {
@@ -50,6 +51,7 @@ const Textarea = React.forwardRef<HTMLDivElement, TextareaProps>(
           language={language}
           value={value}
           onChange={(val) => onChange?.(val ?? "")}
+          onMount={onMount}
           options={{
             minimap: { enabled: false },
             lineNumbers: "on",
